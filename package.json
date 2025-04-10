@@ -1,6 +1,6 @@
 {
-  "name": "@rectpack/rectpack",
-  "version": "0.0.1",
+  "name": "rectpackbin",
+  "version": "0.0.2",
   "description": "A helpful description of your package",
   "main": "index.js",
   "scripts": {
@@ -11,5 +11,19 @@
     "url": "https://github.com/diljots99/rectpack.git"
   },
   "author": "Diljot Singh",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "jest": "^29.7.0"
+  }
 }
