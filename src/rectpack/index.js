@@ -9,19 +9,14 @@ import {
     GuillotineBafSas, GuillotineBafLas,
     GuillotineBafSlas, GuillotineBafLlas,
     GuillotineBafMaxas, GuillotineBafMinas
-  } from './rectpack/guillotine.js';
+  } from './guillotine.js';
 
 
 
-  // packer.js - constants
-  import {
-    SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE,
-    SORT_LSIDE, SORT_RATIO, SORT_NONE
-  } from './rectpack/packer.js';
 
   // packer.js - classes and functions
   import {
-      float2dec,
+    float2dec,
     SORT_AREA,
     SORT_PERI,
     SORT_DIFF,
@@ -36,8 +31,16 @@ import {
     PackerOnline,
     PackingMode,
     PackingBin,
-    newPacker
-  } from './rectpack/packer';
+    newPacker,
+    Packer,
+    PackerBNF,
+    PackerBFF,
+    PackerBBF,
+    PackerOnlineBNF,
+    PackerOnlineBFF,
+    PackerOnlineBBF,
+    PackerGlobal,
+  } from './packer.js';
 
   // guillotine.js
 export  {
@@ -74,7 +77,15 @@ export {
   PackerOnline,
   PackingMode,
   PackingBin,
-  newPacker
+  newPacker,
+      Packer,
+    PackerBNF,
+    PackerBFF,
+    PackerBBF,
+    PackerOnlineBNF,
+    PackerOnlineBFF,
+    PackerOnlineBBF,
+    PackerGlobal,
 } 
 
  

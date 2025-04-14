@@ -20,27 +20,6 @@ const SORT_LSIDE = (rectList) => [...rectList].sort((a, b) => {
 });
 const SORT_RATIO = (rectList) => [...rectList].sort((a, b) => (b[0] / b[1]) - (a[0] / a[1]));
 const SORT_NONE = (rectList) => [...rectList];
-const PackingMode = {
-    Online: 0,
-    Offline: 1,
-    properties: {
-        0: { name: "Online" },
-        1: { name: "Offline" }
-    }
-};
-
-const PackingBin = {
-    BNF: 0,    // Bin Next Fit
-    BFF: 1,    // Bin First Fit
-    BBF: 2,    // Bin Best Fit
-    Global: 3,  // Global Fit
-    properties: {
-        0: { name: "BNF" },
-        1: { name: "BFF" },
-        2: { name: "BBF" },
-        3: { name: "Global" }
-    }
-};
 
 class BinFactory {
     constructor(width, height, count, packAlgo, ...args) {
@@ -83,7 +62,43 @@ class BinFactory {
     }
 }
 
- class PackerOnline {
+class PackerBNFMixin {
+    async addRect(width, height, rid = null) {
+        while (true) {
+            if (this._openBins.length === 0) {
+                const newBin = await this._newOpenBin(width, height, rid);
+                if (!newBin) return null;
+            }
+
+            const rect = await this._openBins[0].addRect(width, height, rid);
+            if (rect) return rect;
+
+            const closedBin = this._openBins.shift();
+            this._closedBins.push(closedBin);
+        }
+    }
+}
+
+class PackerBFFMixin {
+    async addRect(width, height, rid = null) {
+        for (const bin of this._openBins) {
+            const rect = await bin.addRect(width, height, rid);
+            if (rect) return rect;
+        }
+
+        while (true) {
+            const newBin = await this._newOpenBin(width, height, rid);
+            if (!newBin) return null;
+
+            const rect = await newBin.addRect(width, height, rid);
+            if (rect) return rect;
+        }
+    }
+}
+
+
+
+class PackerOnline {
     constructor(packAlgo = GuillotineBssfSas, rotation = true) {
         this._rotation = rotation;
         this._packAlgo = packAlgo;
@@ -158,12 +173,108 @@ class BinFactory {
     }
 }
 
+// Enum implementation
+const PackingMode = {
+    Online: 0,
+    Offline: 1,
+    properties: {
+        0: { name: "Online" },
+        1: { name: "Offline" }
+    }
+};
 
-const PackerMixin = Base => class extends Base {
+const PackingBin = {
+    BNF: 0,    // Bin Next Fit
+    BFF: 1,    // Bin First Fit
+    BBF: 2,    // Bin Best Fit
+    Global: 3,  // Global Fit
+    properties: {
+        0: { name: "BNF" },
+        1: { name: "BFF" },
+        2: { name: "BBF" },
+        3: { name: "Global" }
+    }
+};
+
+/**
+ * Packer factory helper function
+ * @param {PackingMode} mode - Packing mode (Online or Offline)
+ * @param {PackingBin} binAlgo - Bin selection heuristic
+ * @param {Function} packAlgo - Algorithm used (default: GuillotineBssfSas)
+ * @param {Function} sortAlgo - Sorting algorithm (default: SORT_AREA)
+ * @param {boolean} rotation - Enable or disable rectangle rotation
+ * @returns {Packer} Initialized packer instance
+ */
+function newPacker({
+    mode = PackingMode.Offline,
+    binAlgo = PackingBin.BBF,
+    packAlgo = GuillotineBssfSas,
+    sortAlgo = SORT_AREA,
+    rotation = true
+} = {}) {
+    let packerClass = null;
+
+    // Online Mode
+    if (mode === PackingMode.Online) {
+        sortAlgo = null;
+        switch (binAlgo) {
+            case PackingBin.BNF:
+                packerClass = PackerOnlineBNF;
+                break;
+            case PackingBin.BFF:
+                packerClass = PackerOnlineBFF;
+                break;
+            case PackingBin.BBF:
+                packerClass = PackerOnlineBBF;
+                break;
+            default:
+                throw new Error("Unsupported bin selection heuristic");
+        }
+    }
+    // Offline Mode
+    else if (mode === PackingMode.Offline) {
+        switch (binAlgo) {
+            case PackingBin.BNF:
+                packerClass = PackerBNF;
+                break;
+            case PackingBin.BFF:
+                packerClass = PackerBFF;
+                break;
+            case PackingBin.BBF:
+                packerClass = PackerBBFStandalone;
+                break;
+            case PackingBin.Global:
+                packerClass = PackerGlobal;
+                sortAlgo = null;
+                break;
+            default:
+                throw new Error("Unsupported bin selection heuristic");
+        }
+    }
+    else {
+        throw new Error("Unknown packing mode");
+    }
+
+    // Create and return the appropriate packer instance
+    if (sortAlgo) {
+        return new packerClass({
+            packAlgo,
+            sortAlgo,
+            rotation
+        });
+    } else {
+        return new packerClass({
+            packAlgo,
+            rotation
+        });
+    }
+}
+
+class Packer extends PackerOnline {
     /**
      * Rectangles aren't packed until pack() is called
      */
-    constructor(packAlgo = GuillotineBssfSas, sortAlgo = SORT_NONE, rotation = true ) {
+    constructor({ packAlgo = GuillotineBssfSas, sortAlgo = SORT_NONE, rotation = true } = {}) {
         super(packAlgo, rotation);
         
         this._sortAlgo = sortAlgo;
@@ -212,145 +323,232 @@ const PackerMixin = Base => class extends Base {
     }
 }
 
-const PackerOnlineBase = PackerMixin(PackerOnline);
-class Packer extends PackerOnlineBase {
-    constructor(...args) {
-        super(...args);
-    }
-}
-
-const PackerBNFMixin = Base => class extends Base {
-    constructor(...args) {
-      super(...args);
-      console.log("BNF heuristic enabled");
-    }
-  
+class PackerBBFMixin extends Packer {
     async addRect(width, height, rid = null) {
-        while (true) {
-            if (this._openBins.length === 0) {
-                const newBin = await this._newOpenBin(width, height, rid);
-                if (!newBin) return null;
-            }
+        // Try packing into open bins
+        const fitBins = this._openBins
+            .map(b => [b.fitness(width, height), b])
+            .filter(([fitness]) => fitness !== null);
 
-            const rect = await this._openBins[0].addRect(width, height, rid);
-            if (rect) return rect;
-
-            const closedBin = this._openBins.shift();
-            this._closedBins.push(closedBin);
-        }
-    }
-};
-
-const PackerBFFMixin = Base => class extends Base {
-    constructor(...args) {
-      super(...args);
-      console.log("BFF heuristic enabled");
-    }
-
-    async addRect(width, height, rid = null) {
-        for (const bin of this._openBins) {
-            const rect = await bin.addRect(width, height, rid);
-            if (rect) return rect;
+        if (fitBins.length > 0) {
+            const [_, bestBin] = fitBins.reduce((min, curr) => 
+                curr[0] < min[0] ? curr : min
+            );
+            return await bestBin.addRect(width, height, rid);
         }
 
+        // Try packing into empty bins
         while (true) {
             const newBin = await this._newOpenBin(width, height, rid);
             if (!newBin) return null;
 
-            const rect = await newBin.addRect(width, height, rid);
-            if (rect) return rect;
+            if (await newBin.addRect(width, height, rid)) {
+                return true;
+            }
         }
     }
 }
-// Enum implementation
+class PackerBNF extends Packer {
+    /**
+     * BNF (Bin Next Fit): Only one open bin, if rectangle doesn't fit
+     * go to next bin and close current one.
+     */
+}
 
-const PackerBBFMixin = Base => class extends Base {
-  constructor(...args) {
-    super(...args);
-    console.log("BBF heuristic enabled");
-  }
+// Apply the mixin
+Object.assign(PackerBNF.prototype, PackerBNFMixin.prototype);
 
-  async addRect(width, height, rid = null) {
-    // Try packing into open bins
-    const fitBins = this._openBins
-        .map(b => [b.fitness(width, height), b])
-        .filter(([fitness]) => fitness !== null);
+class PackerBFF extends Packer {
+    /**
+     * BFF (Bin First Fit): Pack rectangle in first bin it fits
+     */
+}
 
-    if (fitBins.length > 0) {
-        const [_, bestBin] = fitBins.reduce((min, curr) => 
-            curr[0] < min[0] ? curr : min
-        );
-        return await bestBin.addRect(width, height, rid);
+// Apply the mixin
+Object.assign(PackerBFF.prototype, PackerBFFMixin.prototype);
+
+
+
+class PackerBBF extends PackerBBFMixin {
+        /**
+         * BBF (Bin Best Fit): Pack rectangle in bin that gives best fitness
+         */
     }
 
-    // Try packing into empty bins
-    while (true) {
-        const newBin = await this._newOpenBin(width, height, rid);
-        if (!newBin) return null;
-
-        if (await newBin.addRect(width, height, rid)) {
-            return true;
+    class PackerBBFStandalone {
+        constructor({ packAlgo = GuillotineBssfSas, sortAlgo = SORT_NONE, rotation = true } = {}) {
+            this._rotation = rotation;
+            this._packAlgo = packAlgo;
+            this._sortAlgo = sortAlgo;
+            
+            // User provided bins and Rectangles
+            this._availBins = [];
+            this._availRect = [];
+            
+            // Aux vars used during packing
+            this._sortedRect = [];
+            
+            this.reset();
+        }
+    
+        *[Symbol.iterator]() {
+            yield* [...this._closedBins, ...this._openBins];
+        }
+    
+        get length() {
+            return this._closedBins.length + this._openBins.length;
+        }
+    
+        reset() {
+            this._closedBins = [];
+            this._openBins = [];
+            this._emptyBins = new Map();
+            this._binCount = 0;
+        }
+    
+        _newOpenBin(width = null, height = null, rid = null) {
+            const factoriesToDelete = new Set();
+            let newBin = null;
+    
+            for (const [key, binFac] of Object.entries(this._emptyBins)) {
+                if (!binFac.fitsInside(width, height)) continue;
+    
+                newBin = binFac.newBin();
+                if (!newBin) continue;
+    
+                this._openBins.push(newBin);
+    
+                if (binFac.isEmpty()) {
+                    factoriesToDelete.add(key);
+                }
+                break;
+            }
+    
+            factoriesToDelete.forEach(f => delete this._emptyBins[f]);
+            return newBin;
+        }
+    
+        addBin(width, height, count = 1, options = {}) {
+            // For initial bin setup
+            this._availBins.push([width, height, count, options]);
+            
+            // For runtime bin management
+            options.rot = this._rotation;
+            const binFactory = new BinFactory(width, height, count, this._packAlgo, options);
+            this._emptyBins[this._binCount++] = binFactory;
+        }
+    
+        addRect(width, height, rid = null) {
+            // For initial rectangle setup
+            this._availRect.push([width, height, rid]);
+        }
+    
+        async _addRectRuntime(width, height, rid = null) {
+            // Try packing into open bins
+            const fitBins = this._openBins
+                .map(b => [b.fitness(width, height), b])
+                .filter(([fitness]) => fitness !== null);
+    
+            if (fitBins.length > 0) {
+                const [_, bestBin] = fitBins.reduce((min, curr) => 
+                    curr[0] < min[0] ? curr : min
+                );
+                return await bestBin.addRect(width, height, rid);
+            }
+    
+            // Try packing into empty bins
+            while (true) {
+                const newBin = await this._newOpenBin(width, height, rid);
+                if (!newBin) return null;
+    
+                if (await newBin.addRect(width, height, rid)) {
+                    return true;
+                }
+            }
+        }
+    
+        rectList() {
+            const rectangles = [];
+            let binCount = 0;
+    
+            for (const bin of this) {
+                for (const rect of bin) {
+                    rectangles.push([binCount, rect.x, rect.y, rect.width, rect.height, rect.rid]);
+                }
+                binCount++;
+            }
+    
+            return rectangles;
+        }
+    
+        binList() {
+            return [...this].map(b => [b.width, b.height]);
+        }
+    
+        validatePacking() {
+            for (const b of this) {
+                b.validatePacking();
+            }
+        }
+    
+        _isEverythingReady() {
+            return this._availRect.length > 0 && this._availBins.length > 0;
+        }
+    
+        async pack() {
+            this.reset();
+    
+            if (!this._isEverythingReady()) {
+                return;
+            }
+    
+            // Add available bins to packer
+            const length = this._availBins.length;
+            for (let i = 0; i < length; i++) {
+                const [width, height, count, extraOptions] = this._availBins[i];
+                this.addBin(width, height, count, extraOptions);
+            }
+    
+            // If enabled sort rectangles
+            this._sortedRect = this._sortAlgo(this._availRect);
+    
+            // Start packing
+            for (const r of this._sortedRect) {
+                await this._addRectRuntime(...r);
+            }
         }
     }
-}
-};
+// Apply the mixin
+// Object.assign(PackerBBF.prototype, PackerBBFMixin.prototype);
 
-
-
-
-
-const PackerBNFBase = PackerBNFMixin(Packer);
-class PackerBNF extends PackerBNFBase {
-    constructor(...args) {
-        super(...args);
-    }
+class PackerOnlineBNF extends PackerOnline {
+    /**
+     * BNF Bin Next Fit Online variant
+     */
 }
 
+// Apply the mixin
+Object.assign(PackerOnlineBNF.prototype, PackerBNFMixin.prototype);
 
-const PackerBFFBase = PackerBFFMixin(Packer);
-class PackerBFF extends PackerBFFBase {
-    constructor(...args) {
-        super(...args);
-    }
+class PackerOnlineBFF extends PackerOnline {
+    /**
+     * BFF Bin First Fit Online variant
+     */
 }
 
+// Apply the mixin
+Object.assign(PackerOnlineBFF.prototype, PackerBFFMixin.prototype);
 
-
-const PackerBBFBase = PackerBBFMixin(Packer);
-class PackerBBF extends PackerBBFBase {
-    constructor(...args) {
-        super(...args);
-    }
+class PackerOnlineBBF extends PackerOnline {
+    /**
+     * BBF Bin Best Fit Online variant
+     */
 }
 
+// Apply the mixin
+Object.assign(PackerOnlineBBF.prototype, PackerBBFMixin.prototype);
 
-
-
-const PackerOnlineBNFBase = PackerBNFMixin(PackerOnline);
-class PackerOnlineBNF extends PackerOnlineBNFBase {
-    constructor(...args) {
-        super(...args);
-    }
-}
-
-const PackerOnlineBFFBase = PackerBFFMixin(PackerOnline);
-class PackerOnlineBFF extends PackerOnlineBFFBase {
-    constructor(...args) {
-        super(...args);
-    }
-}
-
-
-const PackerOnlineBBFBase = PackerBBFMixin(PackerOnline);
-class PackerOnlineBBF extends PackerOnlineBBFBase {
-    constructor(...args) {
-        super(...args);
-    }
-}
-
-
-const PackerGlobalBase = PackerBNFMixin(Packer);
-class PackerGlobal extends PackerGlobalBase {
+class PackerGlobal extends Packer {
     /**
      * GLOBAL: For each bin pack the rectangle with the best fitness.
      */
@@ -472,80 +670,8 @@ class PackerGlobal extends PackerGlobalBase {
 
 }
 
-
-/**
- * Packer factory helper function
- * @param {PackingMode} mode - Packing mode (Online or Offline)
- * @param {PackingBin} binAlgo - Bin selection heuristic
- * @param {Function} packAlgo - Algorithm used (default: GuillotineBssfSas)
- * @param {Function} sortAlgo - Sorting algorithm (default: SORT_AREA)
- * @param {boolean} rotation - Enable or disable rectangle rotation
- * @returns {Packer} Initialized packer instance
- */
-function newPacker({
-    mode = PackingMode.Offline,
-    binAlgo = PackingBin.BBF,
-    packAlgo = GuillotineBssfSas,
-    sortAlgo = SORT_AREA,
-    rotation = true
-} = {}) {
-    let packerClass = null;
-
-    // Online Mode
-    if (mode === PackingMode.Online) {
-        sortAlgo = null;
-        switch (binAlgo) {
-            case PackingBin.BNF:
-                packerClass = PackerOnlineBNF;
-                break;
-            case PackingBin.BFF:
-                packerClass = PackerOnlineBFF;
-                break;
-            case PackingBin.BBF:
-                packerClass = PackerOnlineBBF;
-                break;
-            default:
-                throw new Error("Unsupported bin selection heuristic");
-        }
-    }
-    // Offline Mode
-    else if (mode === PackingMode.Offline) {
-        switch (binAlgo) {
-            case PackingBin.BNF:
-                packerClass = PackerBNF;
-                break;
-            case PackingBin.BFF:
-                packerClass = PackerBFF;
-                break;
-            case PackingBin.BBF:
-                packerClass = PackerBBF;
-                break;
-            case PackingBin.Global:
-                packerClass = PackerGlobal;
-                sortAlgo = null;
-                break;
-            default:
-                throw new Error("Unsupported bin selection heuristic");
-        }
-    }
-    else {
-        throw new Error("Unknown packing mode");
-    }
-
-    // Create and return the appropriate packer instance
-    if (sortAlgo) {
-        return new packerClass({
-            packAlgo,
-            sortAlgo,
-            rotation
-        });
-    } else {
-        return new packerClass({
-            packAlgo,
-            rotation
-        });
-    }
-}
+// Apply the mixin
+Object.assign(PackerGlobal.prototype, PackerBNFMixin.prototype);
 
 // Export the classes and sorting functions
 module.exports = {

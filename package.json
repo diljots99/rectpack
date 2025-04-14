@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "description": "A helpful description of your package",
   "main": "index.js",
+  "module": "commonjs",
   "scripts": {
     "test": "jest"
   },
@@ -13,7 +14,9 @@
   "author": "Diljot Singh",
   "license": "MIT",
   "dependencies": {
-    
+    "canvas": "^3.1.0",
+    "guillotine-packer": "^1.0.2",
+    "sharp": "^0.34.1"
   },
   "jest": {
     "transform": {
