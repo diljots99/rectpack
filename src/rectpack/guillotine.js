@@ -121,17 +121,21 @@ const GuillotineMixin = Base => class extends Base {
             })
             .filter(x => x !== null);
 
-        const fitr = this.rot ? this._sections
-            .map(s => {
-                const fitness = this._section_fitness(s, h, w);
-                return fitness !== null ? [fitness, s, true] : null;
-            })
-            .filter(x => x !== null) : [];
+        let fitr = []
+        
+        if (this.rot.rot === true) {
+            fitr = this._sections
+                .map(s => {
+                    const fitness = this._section_fitness(s, h, w);
+                    return fitness !== null ? [fitness, s, true] : null;
+                })
+                .filter(x => x !== null) ;
+        }
 
         const fit = [...fitn, ...fitr];
         
         if (fit.length === 0) {
-            return [null, null];
+            return [];
         }
 
         const [_, sec, rot] = fit.reduce((min, curr) => 
@@ -159,7 +163,9 @@ const GuillotineMixin = Base => class extends Base {
         }
 
         if (rotated) {
-            [width, height] = [height, width];
+            let temp = width;
+            width = height;
+            height = temp;
         }
 
         this._sections = this._sections.filter(s => s !== section);
