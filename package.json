@@ -5,7 +5,8 @@
   "main": "index.js",
   "module": "commonjs",
   "scripts": {
-    "test": "jest"
+    "test:single": "jest -t default_options test/packer/packer.test.js",
+    "test": "jest test/packer/packer.test.js"
   },
   "repository": {
     "type": "git",

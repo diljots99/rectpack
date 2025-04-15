@@ -66,7 +66,7 @@ class PackerBBFStandalone {
         this._availRect.push([width, height, rid]);
     }
 
-    async _addRectRuntime(width, height, rid = null) {
+      _addRectRuntime(width, height, rid = null) {
         // Try packing into open bins
         const fitBins = this._openBins
             .map(b => [b.fitness(width, height), b])
@@ -76,15 +76,15 @@ class PackerBBFStandalone {
             const [_, bestBin] = fitBins.reduce((min, curr) => 
                 curr[0] < min[0] ? curr : min
             );
-            return await bestBin.addRect(width, height, rid);
+            return   bestBin.addRect(width, height, rid);
         }
 
         // Try packing into empty bins
         while (true) {
-            const newBin = await this._newOpenBin(width, height, rid);
+            const newBin =   this._newOpenBin(width, height, rid);
             if (!newBin) return null;
 
-            if (await newBin.addRect(width, height, rid)) {
+            if (  newBin.addRect(width, height, rid)) {
                 return true;
             }
         }
@@ -118,7 +118,7 @@ class PackerBBFStandalone {
         return this._availRect.length > 0 && this._availBins.length > 0;
     }
 
-    async pack() {
+      pack() {
         this.reset();
 
         if (!this._isEverythingReady()) {
@@ -136,7 +136,7 @@ class PackerBBFStandalone {
 
         // Start packing
         for (const r of this._sortedRect) {
-            await this._addRectRuntime(...r);
+              this._addRectRuntime(...r);
         }
     }
 }

@@ -45,8 +45,9 @@ class PackingAlgorithm {
         }
 
         if (this.rot && (width > this.width || height > this.height)) {
-            width = height
-            height = width
+            let temp = width;
+            width = height;
+            height = temp;
         }
 
         if (width > this.width || height > this.height) {   

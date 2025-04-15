@@ -1,4 +1,4 @@
-const { 
+const {
   SORT_NONE,
   SORT_AREA,
   SORT_PERI,
@@ -26,7 +26,7 @@ describe('Rectangle Sort Tests', () => {
     const a = [[3, 3], [3, 1], [3, 2], [1, 2], [2, 1]];
     const ordered = SORT_NONE(a);
     expect(ordered).toEqual(a);
-    
+
     // Test empty list
     expect(SORT_NONE([])).toEqual([]);
   });
@@ -35,7 +35,7 @@ describe('Rectangle Sort Tests', () => {
     const a = [[5, 5], [7, 7], [3, 4], [100, 1]];
     const ordered = SORT_AREA(a);
     expect(ordered).toEqual([[100, 1], [7, 7], [5, 5], [3, 4]]);
-    
+
     // Test empty list
     expect(SORT_AREA([])).toEqual([]);
   });
@@ -44,7 +44,7 @@ describe('Rectangle Sort Tests', () => {
     const a = [[5, 5], [7, 7], [3, 4], [40, 1]];
     const ordered = SORT_PERI(a);
     expect(ordered).toEqual([[40, 1], [7, 7], [5, 5], [3, 4]]);
-    
+
     // Test empty list
     expect(SORT_PERI([])).toEqual([]);
   });
@@ -53,7 +53,7 @@ describe('Rectangle Sort Tests', () => {
     const a = [[7, 1], [1, 9], [2, 11], [5, 1]];
     const ordered = SORT_DIFF(a);
     expect(ordered).toEqual([[2, 11], [1, 9], [7, 1], [5, 1]]);
-    
+
     // Test empty list
     expect(SORT_DIFF([])).toEqual([]);
   });
@@ -62,7 +62,7 @@ describe('Rectangle Sort Tests', () => {
     const a = [[2, 9], [7, 3], [4, 5], [11, 3]];
     const ordered = SORT_SSIDE(a);
     expect(ordered).toEqual([[4, 5], [11, 3], [7, 3], [2, 9]]);
-    
+
     // Test empty list
     expect(SORT_SSIDE([])).toEqual([]);
   });
@@ -71,7 +71,7 @@ describe('Rectangle Sort Tests', () => {
     const a = [[19, 5], [32, 5], [6, 19], [9, 11]];
     const ordered = SORT_LSIDE(a);
     expect(ordered).toEqual([[32, 5], [6, 19], [19, 5], [9, 11]]);
-    
+
     // Test empty list
     expect(SORT_LSIDE([])).toEqual([]);
   });
@@ -80,15 +80,15 @@ describe('Rectangle Sort Tests', () => {
     const a = [[12, 5], [15, 4], [4, 1], [1, 2]];
     const ordered = SORT_RATIO(a);
     expect(ordered).toEqual([[4, 1], [15, 4], [12, 5], [1, 2]]);
-    
+
     // Test empty list
     expect(SORT_RATIO([])).toEqual([]);
   });
 });
 
 describe('PackerOnline Tests', () => {
-  test('bin iteration only loops over closed and open bins', async () => {
-    const p = new PackerOnlineBNF( GuillotineBssfSas, false );
+  test('bin iteration only loops over closed and open bins', () => {
+    const p = new PackerOnlineBNF(GuillotineBssfSas, false);
     p.addBin(50, 55);
     p.addBin(30, 30);
     p.addBin(5, 5);
@@ -99,35 +99,35 @@ describe('PackerOnline Tests', () => {
     expect(bins.length).toBe(0);
 
     // One open bin to iterate
-    await p.addRect(50, 50);
+    p.addRect(50, 50);
     const binsAfterOneRect = Array.from(p);
     expect(binsAfterOneRect.length).toBe(1);
 
     // One closed and one open bin
-    await p.addRect(29, 29);
+    p.addRect(29, 29);
     const binsAfterTwoRects = Array.from(p);
     expect(binsAfterTwoRects.length).toBe(2);
     expect(binsAfterTwoRects[0].width).toBe(50); // Test closed bins are first
 
     // Two closed bins, one skipped bin, and an open bin
-    await p.addRect(40, 40);
+    p.addRect(40, 40);
     const binsAfterThreeRects = Array.from(p);
     expect(binsAfterThreeRects.length).toBe(3);
   });
 
-  test('bin order - bins are packed in order they were added', async () => {
-    const p = new PackerOnlineBNF( GuillotineBssfSas, false );
+  test('bin order - bins are packed in order they were added', () => {
+    const p = new PackerOnlineBNF(GuillotineBssfSas, false);
     p.addBin(45, 45);
     p.addBin(30, 30);
     p.addBin(40, 40);
 
-    await p.addRect(20, 20);
+    p.addRect(20, 20);
     expect(p.length).toBe(1);
     const firstBin = Array.from(p)[0];
     expect(firstBin.width).toBe(45);
     expect(firstBin.height).toBe(45);
 
-    await p.addRect(29, 29);
+    p.addRect(29, 29);
     expect(p.length).toBe(2);
     const secondBin = Array.from(p)[1];
     expect(secondBin.width).toBe(30);
@@ -135,7 +135,7 @@ describe('PackerOnline Tests', () => {
 
     // Check bins are added at the end of the queue and used last
     p.addBin(39, 39);
-    await p.addRect(39, 39);
+    p.addRect(39, 39);
     expect(p.length).toBe(3);
     const thirdBin = Array.from(p)[2];
     expect(thirdBin.width).toBe(40);
@@ -144,26 +144,26 @@ describe('PackerOnline Tests', () => {
 });
 
 describe('PackerOnlineBNF Tests', () => {
-  test('bin selection - closes bin after failed packing attempt', async () => {
-    const p = new PackerOnlineBNF( GuillotineBssfSas, false );
+  test('bin selection - closes bin after failed packing attempt', () => {
+    const p = new PackerOnlineBNF(GuillotineBssfSas, false);
     p.addBin(30, 30);
     p.addBin(10, 10);
     p.addBin(40, 40);
 
     // This rectangle fits into first bin
-    await p.addRect(5, 5);
+    p.addRect(5, 5);
     expect(p.length).toBe(1);
     expect(Array.from(p)[0].width).toBe(30);
 
     // This rectangle doesn't fit into the open bin (first), so the bin
     // is closed and rectangle packed into next one where it fits
-    await p.addRect(29, 29);
+    p.addRect(29, 29);
     expect(p.length).toBe(2);
     expect(Array.from(p)[1].width).toBe(40);
 
     // Try to add a rectangle that would have fit into the first bin
     // but it is packed since first bin is closed
-    await p.addRect(10, 10);
+    p.addRect(10, 10);
     expect(p.length).toBe(2);
     const rectList = p.rectList();
     const lastRect = rectList[rectList.length - 1];
@@ -171,77 +171,79 @@ describe('PackerOnlineBNF Tests', () => {
     expect(binIndex).toBe(1);
   });
 
-  test('infinite bins are only tested once when rectangle doesnt fit', async () => {
-    const p = new PackerOnlineBNF();
+  test('infinite bins are only tested once when rectangle doesnt fit', () => {
+    const p = new PackerOnlineBNF({packAlgo: GuillotineBssfSas, rotation: true});
     p.addBin(50, 50, 50);
     p.addBin(100, 100, Infinity);
 
-    await p.addRect(90, 90);
+    p.addRect(90, 90);
     expect(p.length).toBe(1);
-    await p.addRect(95, 95);
+    p.addRect(95, 95);
     expect(p.length).toBe(2);
 
     // Check other bins
-    await p.addRect(40, 40);
+    p.addRect(40, 40);
     expect(p.length).toBe(3);
     expect(Array.from(p)[2].width).toBe(50);
 
-    await p.addRect(45, 45);
+    p.addRect(45, 45);
     expect(p.length).toBe(4);
     expect(Array.from(p)[3].width).toBe(50);
   });
 
-  test('rotation handling', async () => {
-    const p = new PackerOnlineBNF( GuillotineBssfSas, false );
-    await p.addBin(30, 10);
-    await p.addBin(50, 10);
-    await p.addRect(10, 30);
+  test('rotation handling', () => {
+    const p = new PackerOnlineBNF({packAlgo: GuillotineBssfSas, rotation: false});
+    p.addBin(30, 10);
+    p.addBin(50, 10);
+    p.addRect(10, 30);
 
     // Rectangle didn't fit in any bins when rotation was disabled
-    expect(p.rectList().length).toBe(0);
+    const rectList = p.rectList();
+    expect(rectList.length).toBe(0);
     expect(p.length).toBe(0);
 
     // With rotation the rectangle is successfully packed
-    const p2 = new PackerOnlineBNF( GuillotineBssfSas, true );
-    await p2.addBin(30, 10);
-    await p2.addBin(50, 10);
-    await p2.addRect(10, 30);
-    expect(p2.rectList()[0]).toEqual([0, 0, 0, 30, 10, null]);
+    const p2 = new PackerOnlineBNF({packAlgo: GuillotineBssfSas, rotation: true});
+    p2.addBin(30, 10);
+    p2.addBin(50, 10);
+    p2.addRect(10, 30);
+    const rectList2 = p2.rectList();
+    expect(rectList2[0]).toEqual([0, 0, 0, 30, 10, null]);
     expect(p2.length).toBe(1);
   });
 });
 
 describe('PackerOnlineBFF Tests', () => {
-  test('bin selection - packs into first bin where it fits', async () => {
-    const p = new PackerOnlineBFF(
-      GuillotineBafSas,
-      false   
-    );
+  test('bin selection - packs into first bin where it fits', () => {
+    const p = new PackerOnlineBFF({
+      packAlgo: GuillotineBafSas,
+      rotation: false
+    });
 
     p.addBin(20, 20, 2);
     p.addBin(100, 100);
 
     // Packed into second bin
-    await p.addRect(90, 90);
+    p.addRect(90, 90);
     expect(p.length).toBe(1);
     expect(Array.from(p)[0].width).toBe(100);
 
     // Rectangles are packed into open bins whenever possible
-    await p.addRect(10, 10);
+    p.addRect(10, 10);
     expect(p.length).toBe(1);
     expect(p.rectList().length).toBe(2);
 
-    await p.addRect(5, 5);
+    p.addRect(5, 5);
     expect(p.length).toBe(1);
     expect(p.rectList().length).toBe(3);
 
     // Rectangle doesn't fit, open new bin
-    await p.addRect(15, 15);
+    p.addRect(15, 15);
     expect(p.length).toBe(2);
     expect(p.rectList().length).toBe(4);
 
     // If there are more than one possible bin select first one
-    await p.addRect(5, 5);
+    p.addRect(5, 5);
     expect(p.length).toBe(2);
     expect(p.rectList().length).toBe(5);
     expect(p.rectList()).toContainEqual([0, 10, 90, 5, 5, null]);
@@ -249,7 +251,7 @@ describe('PackerOnlineBFF Tests', () => {
 });
 
 describe('PackerOnlineBBF Tests', () => {
-  test('bin selection - packs into bin with best fitness', async () => {
+  test('bin selection - packs into bin with best fitness', () => {
     const p = new PackerOnlineBBF(
       GuillotineBafSas,
       false
@@ -261,45 +263,46 @@ describe('PackerOnlineBBF Tests', () => {
     p.addBin(50, 50);
 
     // First rectangle is packed into first bin where it fits
-    await p.addRect(50, 30);
+    p.addRect(50, 30);
     expect(p.length).toBe(1);
     expect(Array.from(p)[0].width).toBe(55);
 
     // Another bin is opened when it doesn't fit into first one
-    await p.addRect(50, 30);
+    p.addRect(50, 30);
     expect(p.length).toBe(2);
     expect(Array.from(p)[1].width).toBe(50);
 
     // Rectangle is placed into bin with best fitness, not first where it fits
-    await p.addRect(20, 20);
+    p.addRect(20, 20);
     expect(p.length).toBe(2);
     expect(p.rectList()).toContainEqual([1, 0, 30, 20, 20, null]);
   });
 });
 
 describe('Packer Tests', () => {
-  test('initialization defaults', async () => {
+  test('initialization defaults', () => {
     // Test rotation is enabled by default
-    const p = new PackerBNF( GuillotineBafSas, true );
+    const p = new PackerBNF({packAlgo: GuillotineBafSas, rotation: true});
     p.addBin(100, 10);
     p.addRect(10, 89);
-    await p.pack();
-    expect(p.rectList()[0]).toEqual([0, 0, 0, 89, 10, null]);
+    p.pack();
+    const rectList = p.rectList();
+    expect(rectList[0]).toEqual([0, 0, 0, 89, 10, null]);
 
     // Test default packing algo
     const p2 = new PackerBFF();
     p2.addBin(10, 10);
     p2.addRect(1, 1);
-    await p2.pack();
+    p2.pack();
     for (const b of p2) {
       expect(b).toBeInstanceOf(GuillotineBssfSas);
     }
 
     // Test default sorting algo is unsorted
-    const p3 = new PackerBFF(
-      packAlgo= GuillotineBssfSas,
-      rotation= false
-    );
+    const p3 = new PackerBFF({
+      packAlgo: GuillotineBssfSas,
+      rotation: false
+    });
     p3.addBin(100, 100, 20);
 
     p3.addRect(70, 70);
@@ -307,7 +310,7 @@ describe('Packer Tests', () => {
     p3.addRect(90, 90);
     p3.addRect(55, 90);
     p3.addRect(60, 60);
-    await p3.pack();
+    p3.pack();
 
     expect(p3.rectList()).toContainEqual([0, 0, 0, 70, 70, null]);
     expect(p3.rectList()).toContainEqual([1, 0, 0, 90, 55, null]);
@@ -316,11 +319,11 @@ describe('Packer Tests', () => {
     expect(p3.rectList()).toContainEqual([4, 0, 0, 60, 60, null]);
   });
 
-  test('packing functionality', async () => {
+  test('packing functionality', () => {
     // Check packing without bins doesn't raise errors
     const p = new PackerBFF();
     p.addRect(10, 10);
-    await p.pack();
+    p.pack();
 
     expect(p.rectList()).toEqual([]);
     expect(p.binList()).toEqual([]);
@@ -329,33 +332,36 @@ describe('Packer Tests', () => {
     // No errors when there are no rectangles to pack
     const p2 = new PackerBFF();
     p2.addBin(10, 10);
-    await p2.pack();
+    p2.pack();
     expect(p2.rectList()).toEqual([]);
     expect(p2.binList()).toEqual([]);
 
     // Test rectangles are packed into first available bin
-    const p3 = new PackerBFF(
-    //   rotation= false,
-      sortAlgo= SORT_NONE
-    );
+    const p3 = new PackerBFF({
+      packAlgo: GuillotineBssfSas,
+      rotation: false,
+    });
     p3.addBin(20, 10);
     p3.addBin(50, 50);
     p3.addRect(10, 20);
     p3.addRect(41, 41); // Not enough space for this rectangle
-    await p3.pack();
+    p3.pack();
 
-    expect(p3.binList().length).toBe(1);
+    const binList = p3.binList();
+    expect(binList.length).toBe(1);
     expect(Array.from(p3)[0].width).toBe(50);
     expect(Array.from(p3)[0].height).toBe(50);
-    expect(p3.rectList()[0]).toEqual([0, 0, 0, 10, 20, null]);
+    const rectList = p3.rectList();
+    expect(rectList[0]).toEqual([0, 0, 0, 10, 20, null]);
   });
 });
 
 describe('newPacker Tests', () => {
-  test('default options', async () => {
+  
+  test('default_options', () => {
     // Test default options
     const p = newPacker();
-    
+
     // Default mode Online BBF
     expect(p).toBeInstanceOf(PackerBBF);
 
@@ -365,32 +371,35 @@ describe('newPacker Tests', () => {
     // Default packing algo
     p.addRect(100, 10);
     p.addBin(10, 100);
-    await p.pack();
+    p.pack();
     for (const b of p) {
       expect(b).toBeInstanceOf(GuillotineBssfSas);
     }
 
     // Test default sorting algo is SORT_AREA
     const p2 = newPacker({
-      packAlgo: GuillotineBssfSas,
       rotation: false
     });
-    p2.addBin(100, 100, 20);
-   
+    expect(p2._rotation).toBe(false);
+    p2.addBin(100, 100, 10);
+
+
+
+    
     p2.addRect(70, 70);
     p2.addRect(90, 55);
     p2.addRect(90, 90);
     p2.addRect(55, 90);
     p2.addRect(60, 60);
-    await p2.pack();
+    p2.pack();
 
     const rectList = p2.rectList();
     expect(rectList.length).toBe(5);
-    expect(rectList).toContainEqual([0, 0, 0, 90, 90, null]);
-    expect(rectList).toContainEqual([1, 0, 0, 90, 55, null]);
-    expect(rectList).toContainEqual([2, 0, 0, 70, 70, null]);
-    expect(rectList).toContainEqual([3, 0, 0, 60, 60, null]);
-    expect(rectList).toContainEqual([4, 0, 0, 55, 90, null]);
+    expect(rectList).toContainEqual([0, 0, 0, 90, 90, null]);    // Largest area rectangle
+    expect(rectList).toContainEqual([1, 0, 0, 90, 55, null]);    // Second largest
+    expect(rectList).toContainEqual([2, 0, 0, 55, 90, null]);    // Third largest
+    expect(rectList).toContainEqual([3, 0, 0, 70, 70, null]);    // Fourth largest
+    expect(rectList).toContainEqual([4, 0, 0, 60, 60, null]);    // Fifth largest
   });
 
   test('packing modes', () => {
@@ -439,4 +448,3 @@ describe('newPacker Tests', () => {
     expect(p7).toBeInstanceOf(PackerGlobal);
   });
 });
- 

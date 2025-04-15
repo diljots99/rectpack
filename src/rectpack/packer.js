@@ -84,7 +84,7 @@ class BinFactory {
 }
 
  class PackerOnline {
-    constructor(packAlgo = GuillotineBssfSas, rotation = true) {
+    constructor({packAlgo = GuillotineBssfSas, rotation = true}) {
         this._rotation = rotation;
         this._packAlgo = packAlgo;
         this.reset();
@@ -163,8 +163,8 @@ const PackerMixin = Base => class extends Base {
     /**
      * Rectangles aren't packed until pack() is called
      */
-    constructor(packAlgo = GuillotineBssfSas, sortAlgo = SORT_NONE, rotation = true ) {
-        super(packAlgo, rotation);
+    constructor({packAlgo = GuillotineBssfSas, sortAlgo = SORT_NONE, rotation = true} = {} ) {
+        super({packAlgo, rotation});
         
         this._sortAlgo = sortAlgo;
 
@@ -183,12 +183,15 @@ const PackerMixin = Base => class extends Base {
     addRect(width, height, rid = null) {
         this._availRect.push([width, height, rid]);
     }
+    addRectOffline(width, height, rid = null) {
+        this._availRect.push([width, height, rid]);
+    }
 
     _isEverythingReady() {
         return this._availRect.length > 0 && this._availBins.length > 0;
     }
 
-    async pack() {
+    pack() {
         this.reset();
 
         if (!this._isEverythingReady()) {
@@ -199,7 +202,7 @@ const PackerMixin = Base => class extends Base {
         // Add available bins to packer
         for (let i = 0; i < this._availBins.length; i++) {
             const [width, height, count, extraOptions] = this._availBins[i];
-            this.addBin(width, height, count, extraOptions);
+            super.addBin(width, height, count, extraOptions);
         }
 
         // If enabled sort rectangles
@@ -207,7 +210,7 @@ const PackerMixin = Base => class extends Base {
 
         // Start packing
         for (const r of this._sortedRect) {
-            await super.addRect(...r);
+            super.addRect(...r);
         }
     }
 }
@@ -222,17 +225,16 @@ class Packer extends PackerOnlineBase {
 const PackerBNFMixin = Base => class extends Base {
     constructor(...args) {
       super(...args);
-      console.log("BNF heuristic enabled");
     }
   
-    async addRect(width, height, rid = null) {
+      addRect(width, height, rid = null) {
         while (true) {
             if (this._openBins.length === 0) {
-                const newBin = await this._newOpenBin(width, height, rid);
+                const newBin =   this._newOpenBin(width, height, rid);
                 if (!newBin) return null;
             }
 
-            const rect = await this._openBins[0].addRect(width, height, rid);
+            const rect =   this._openBins[0].addRect(width, height, rid);
             if (rect) return rect;
 
             const closedBin = this._openBins.shift();
@@ -244,20 +246,19 @@ const PackerBNFMixin = Base => class extends Base {
 const PackerBFFMixin = Base => class extends Base {
     constructor(...args) {
       super(...args);
-      console.log("BFF heuristic enabled");
     }
 
-    async addRect(width, height, rid = null) {
+      addRect(width, height, rid = null) {
         for (const bin of this._openBins) {
-            const rect = await bin.addRect(width, height, rid);
+            const rect =   bin.addRect(width, height, rid);
             if (rect) return rect;
         }
 
         while (true) {
-            const newBin = await this._newOpenBin(width, height, rid);
+            const newBin =   this._newOpenBin(width, height, rid);
             if (!newBin) return null;
 
-            const rect = await newBin.addRect(width, height, rid);
+            const rect =   newBin.addRect(width, height, rid);
             if (rect) return rect;
         }
     }
@@ -267,10 +268,9 @@ const PackerBFFMixin = Base => class extends Base {
 const PackerBBFMixin = Base => class extends Base {
   constructor(...args) {
     super(...args);
-    console.log("BBF heuristic enabled");
   }
 
-  async addRect(width, height, rid = null) {
+    addRect(width, height, rid = null) {
     // Try packing into open bins
     const fitBins = this._openBins
         .map(b => [b.fitness(width, height), b])
@@ -280,15 +280,16 @@ const PackerBBFMixin = Base => class extends Base {
         const [_, bestBin] = fitBins.reduce((min, curr) => 
             curr[0] < min[0] ? curr : min
         );
-        return await bestBin.addRect(width, height, rid);
+        bestBin.addRect(width, height, rid);
+        return true;
     }
 
     // Try packing into empty bins
     while (true) {
-        const newBin = await this._newOpenBin(width, height, rid);
-        if (!newBin) return null;
+        const newBin =   this._newOpenBin(width, height, rid);
+        if (!newBin) return false;
 
-        if (await newBin.addRect(width, height, rid)) {
+        if (  newBin.addRect(width, height, rid)) {
             return true;
         }
     }
@@ -299,7 +300,7 @@ const PackerBBFMixin = Base => class extends Base {
 
 
 
-const PackerBNFBase = PackerBNFMixin(Packer);
+const PackerBNFBase = PackerMixin(PackerBNFMixin(PackerOnline));
 class PackerBNF extends PackerBNFBase {
     constructor(...args) {
         super(...args);
@@ -307,7 +308,7 @@ class PackerBNF extends PackerBNFBase {
 }
 
 
-const PackerBFFBase = PackerBFFMixin(Packer);
+const PackerBFFBase = PackerMixin(PackerBFFMixin(PackerOnline));
 class PackerBFF extends PackerBFFBase {
     constructor(...args) {
         super(...args);
@@ -316,7 +317,7 @@ class PackerBFF extends PackerBFFBase {
 
 
 
-const PackerBBFBase = PackerBBFMixin(Packer);
+const PackerBBFBase = PackerMixin(PackerBBFMixin(PackerOnline));
 class PackerBBF extends PackerBBFBase {
     constructor(...args) {
         super(...args);
@@ -425,7 +426,7 @@ class PackerGlobal extends PackerGlobalBase {
         return newBin;
     }
 
-    async pack() {
+      pack() {
         this.reset();
 
         if (!this._isEverythingReady()) {
@@ -465,7 +466,7 @@ class PackerGlobal extends PackerGlobalBase {
                 const bestRect = this._sortedRect[bestRectKey];
                 delete this._sortedRect[bestRectKey];
 
-                await PackerBNFMixin.prototype.addRect.call(this, ...bestRect);
+                  PackerBNFMixin.prototype.addRect.call(this, ...bestRect);
             }
         }
     }
@@ -488,7 +489,7 @@ function newPacker({
     packAlgo = GuillotineBssfSas,
     sortAlgo = SORT_AREA,
     rotation = true
-} = {}) {
+}={}) {
     let packerClass = null;
 
     // Online Mode
