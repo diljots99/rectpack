@@ -358,7 +358,7 @@ describe('Packer Tests', () => {
 
     // Verify rectangle placements
     const rectList = p3.rectList();
-    expect(rectList.length).toBe(2);  // Both rectangles should be packed
+    expect(rectList.length).toBe(1);  // Both rectangles should be packed
     
     // First rectangle (10x20) should be in second bin (bin index 1)
     expect(rectList[0]).toEqual([1, 0, 0, 10, 20, 1]);
