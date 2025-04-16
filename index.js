@@ -9,7 +9,7 @@ import {
     GuillotineBafSas, GuillotineBafLas,
     GuillotineBafSlas, GuillotineBafLlas,
     GuillotineBafMaxas, GuillotineBafMinas
-  } from './rectpack/guillotine.js';
+  } from './src/rectpack/guillotine.js';
 
 
 
@@ -17,7 +17,7 @@ import {
   import {
     SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE,
     SORT_LSIDE, SORT_RATIO, SORT_NONE
-  } from './rectpack/packer.js';
+  } from './src/rectpack/packer.js';
 
   // packer.js - classes and functions
   import {
@@ -37,7 +37,7 @@ import {
     PackingMode,
     PackingBin,
     newPacker
-  } from './rectpack/packer';
+  } from './src/rectpack/packer.js';
 
   // guillotine.js
 export  {
