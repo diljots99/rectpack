@@ -6,7 +6,7 @@
   "module": "commonjs",
   "scripts": {
     "test:single": "jest -t default_options test/packer/packer.test.js",
-    "test": "jest"
+    "test": "jest test/waste/waste.test.js"
   },
   "repository": {
     "type": "git",
