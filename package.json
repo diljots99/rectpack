@@ -6,7 +6,9 @@
   "module": "commonjs",
   "scripts": {
     "test:single": "jest -t default_options test/packer/packer.test.js",
-    "test": "jest test/waste/waste.test.js"
+    "test": "jest test/waste/waste.test.js",
+    "build": "npx esbuild index.js --bundle --minify --platform=browser --outfile=dist/rectpackbin.min.js"
+
   },
   "repository": {
     "type": "git",

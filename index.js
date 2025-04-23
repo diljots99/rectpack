@@ -73,4 +73,12 @@ export {
   newPacker
 } 
 
- 
+window.newPacker = newPacker;
+
+
+window.PackingMode = PackingMode;
+window.PackingBin = PackingBin;
+window.SORT_AREA = SORT_AREA;
+window.GuillotineBssfSas = GuillotineBssfSas;
+
+
