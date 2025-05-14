@@ -31,7 +31,10 @@ const {
   newPacker
 } = require('./src/rectpack/packer.js');
 
-const { MaxRectsBl } = require('./src/rectpack/maxrects.js');
+const {     MaxRectsBl,
+  MaxRectsBssf,
+  MaxRectsBaf,
+  MaxRectsBlsf } = require('./src/rectpack/maxrects.js');
 
 // Exports
 module.exports = {
@@ -45,6 +48,9 @@ module.exports = {
   GuillotineBafSlas, GuillotineBafLlas,
   GuillotineBafMaxas, GuillotineBafMinas,
   MaxRectsBl,
+  MaxRectsBssf,
+  MaxRectsBaf,
+  MaxRectsBlsf,
   float2dec,
   SORT_AREA,
   SORT_PERI,
@@ -70,6 +76,9 @@ if (typeof window !== 'undefined') {
   window.SORT_AREA = SORT_AREA;
   window.GuillotineBssfSas = GuillotineBssfSas;
   window.MaxRectsBl = MaxRectsBl;
+  window.MaxRectsBssf = MaxRectsBssf
+  window.MaxRectsBaf = MaxRectsBaf
+  window.MaxRectsBlsf = MaxRectsBlsf
 }
 
 
