@@ -42,6 +42,12 @@ import {
   PackerGlobal,
 } from './packer.js';
 
+import {
+  MaxRectsBl
+} from './maxrects.js'
+
+export {MaxRectsBl}
+
 // guillotine.js
 export {
   GuillotineBssfSas, GuillotineBssfLas,
