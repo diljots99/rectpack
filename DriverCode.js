@@ -36,10 +36,10 @@ const DPI  = 72;
  
 // Input designs (file path, width in pixels, height in pixels, count)
 const designs = [
-    { path: path.join(__dirname, '6491e6f460d26.png'), width: Math.round(11.5 * DPI), height: Math.round(3.67 * DPI), count: 50 },
-    { path: path.join(__dirname, 'Alejandra Front.png'), width: Math.round(5.01 * DPI), height: Math.round(5.68 * DPI), count: 37 },
-    { path: path.join(__dirname, 'Weaver - F.png'), width: Math.round(3.97 * DPI), height: Math.round(9.20 * DPI), count: 50 },
-    { path: path.join(__dirname, '17154 - Front.png'), width: Math.round(8 * DPI), height: Math.round(2.3 * DPI), count: 50 },
+    { path: path.join(__dirname, 'images','6491e6f460d26.png'), width: Math.round(11.5 * DPI), height: Math.round(3.67 * DPI), count: 50 },
+    { path: path.join(__dirname, 'images','Alejandra Front.png'), width: Math.round(5.01 * DPI), height: Math.round(5.68 * DPI), count: 37 },
+    { path: path.join(__dirname, 'images','Weaver - F.png'), width: Math.round(3.97 * DPI), height: Math.round(9.20 * DPI), count: 50 },
+    { path: path.join(__dirname, 'images','17154 - Front.png'), width: Math.round(8 * DPI), height: Math.round(2.3 * DPI), count: 50 },
 ];
 
 // Gang sheet size (in pixels)
