@@ -1,5 +1,5 @@
-const { Rectangle } = require('./geometry');
-const PackingAlgorithm = require('./packAlgo');
+const { Rectangle } = require('../geometry');
+const PackingAlgorithm = require('../packAlgo');
 
 class Guillotine extends PackingAlgorithm {
     /**
