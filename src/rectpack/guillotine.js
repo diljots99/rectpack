@@ -168,6 +168,14 @@ const GuillotineMixin = Base => class extends Base {
             height = temp;
         }
 
+        // rid = '1-100'
+
+        // TODO: Filename Logic        
+        // if (true){
+        //     height = height + 100
+        //     section.height  = section.height + 100
+        // }
+
         this._sections = this._sections.filter(s => s !== section);
         this._split(section, width, height);
 

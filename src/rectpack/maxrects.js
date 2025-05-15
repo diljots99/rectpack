@@ -172,6 +172,11 @@ class MaxRects extends PackingAlgorithm {
             return null;
         }
         
+        // TODO: Fil}ename Logic        
+        // if (true){
+        //     rect.height  = rect.height + 100
+        // }
+
         this._split(rect);
         this._remove_duplicates();
 
