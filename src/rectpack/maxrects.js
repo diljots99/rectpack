@@ -64,7 +64,7 @@ class MaxRects extends PackingAlgorithm {
             return [null, null];
         }
 
-        const [_, width, height, m] = fit.reduce((min, curr) => 
+        const [_, width, height, m] = fit.reduce((min, curr) =>
             curr[0] < min[0] ? curr : min
         );
 
@@ -79,7 +79,7 @@ class MaxRects extends PackingAlgorithm {
      */
     _generate_splits(m, r) {
         const new_rects = [];
-        
+
         if (r.x > m.x) {
             new_rects.push(new Rectangle(m.x, m.y, r.x - m.x, m.height));
         }
@@ -92,7 +92,7 @@ class MaxRects extends PackingAlgorithm {
         if (r.y > m.y) {
             new_rects.push(new Rectangle(m.x, m.y, m.width, r.y - m.y));
         }
-        
+
         return new_rects;
     }
 
@@ -119,12 +119,12 @@ class MaxRects extends PackingAlgorithm {
      */
     _remove_duplicates() {
         const contained = new Set();
-        
+
         for (let i = 0; i < this._max_rects.length; i++) {
             for (let j = i + 1; j < this._max_rects.length; j++) {
                 const m1 = this._max_rects[i];
                 const m2 = this._max_rects[j];
-                
+
                 if (m1.contains(m2)) {
                     contained.add(m2);
                 } else if (m2.contains(m1)) {
@@ -146,7 +146,7 @@ class MaxRects extends PackingAlgorithm {
         if (!(width > 0 && height > 0)) {
             throw new Error("Width and height must be positive");
         }
-        
+
         const [rect, max_rect] = this._select_position(width, height);
         if (!rect) {
             return null;
@@ -160,9 +160,10 @@ class MaxRects extends PackingAlgorithm {
      * @param {number} width - Rectangle width
      * @param {number} height - Rectangle height
      * @param {string|number} rid - Optional rectangle ID
+     * @param {string|number} file - Optional file
      * @returns {Rectangle|null} Placed rectangle or null if placement failed
      */
-    addRect(width, height, rid = null) {
+    addRect(width, height, rid = null, file = null) {
         if (!(width > 0 && height > 0)) {
             throw new Error("Width and height must be positive");
         }
@@ -171,7 +172,17 @@ class MaxRects extends PackingAlgorithm {
         if (!rect) {
             return null;
         }
-        
+        let fileObj;
+        if (file) {
+            fileObj = JSON.parse(file)
+        }
+          
+        if (fileObj) {
+            if (fileObj?.isShowFileName) {
+                rect.height = rect.height + fileObj.fileNameSpace
+            }
+        }
+
         this._split(rect);
         this._remove_duplicates();
 
@@ -223,7 +234,7 @@ class MaxRectsBl extends MaxRects {
             return [null, null];
         }
 
-        const [_, __, width, height, m] = fit.reduce((min, curr) => 
+        const [_, __, width, height, m] = fit.reduce((min, curr) =>
             curr[0] < min[0] ? curr : min
         );
 

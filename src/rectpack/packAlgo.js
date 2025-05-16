@@ -90,9 +90,10 @@ class PackingAlgorithm {
      * @param {number} width - Rectangle width
      * @param {number} height - Rectangle height
      * @param {string|number} rid - Optional rectangle user id
+     * @param {string|number} file - Optional file
      * @returns {Rectangle|null} - Rectangle with placement coordinates or null if couldn't be placed
      */
-    addRect(width, height, rid = null) {
+    addRect(width, height, rid = null, file = null) {
         throw new Error("Not implemented");
     }
 

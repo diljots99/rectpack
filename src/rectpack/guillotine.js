@@ -16,7 +16,7 @@ const GuillotineMixin = Base => class extends Base {
         super(width, height, rot, ...args);
         this._merge = merge;
         this._sections = [];
-        this._add_section(new Rectangle(0, 0, width, height,null));
+        this._add_section(new Rectangle(0, 0, width, height, null));
     }
 
     /**
@@ -122,23 +122,23 @@ const GuillotineMixin = Base => class extends Base {
             .filter(x => x !== null);
 
         let fitr = []
-        
+
         if (this.rot.rot === true) {
             fitr = this._sections
                 .map(s => {
                     const fitness = this._section_fitness(s, h, w);
                     return fitness !== null ? [fitness, s, true] : null;
                 })
-                .filter(x => x !== null) ;
+                .filter(x => x !== null);
         }
 
         const fit = [...fitn, ...fitr];
-        
+
         if (fit.length === 0) {
             return [];
         }
 
-        const [_, sec, rot] = fit.reduce((min, curr) => 
+        const [_, sec, rot] = fit.reduce((min, curr) =>
             curr[0] < min[0] ? curr : min
         );
 
@@ -150,9 +150,10 @@ const GuillotineMixin = Base => class extends Base {
      * @param {number} width - Rectangle width
      * @param {number} height - Rectangle height
      * @param {string|number} rid - Optional rectangle ID
+     * @param {string|number} file - Optional file
      * @returns {Rectangle|null} Placed rectangle or null if placement failed
      */
-    addRect(width, height, rid = null) {
+    addRect(width, height, rid = null, file = null) {
         if (!(width > 0 && height > 0)) {
             throw new Error("Width and height must be positive");
         }
@@ -166,6 +167,17 @@ const GuillotineMixin = Base => class extends Base {
             let temp = width;
             width = height;
             height = temp;
+        }
+
+        let fileObj;
+        if (file) {
+            fileObj = JSON.parse(file)
+        }
+
+        if (fileObj) {
+            if (fileObj?.isShowFileName) {
+                height = height + fileObj.fileNameSpace
+            }
         }
 
         this._sections = this._sections.filter(s => s !== section);
@@ -192,7 +204,7 @@ const GuillotineMixin = Base => class extends Base {
             return null;
         }
 
-        return rotated ? 
+        return rotated ?
             this._section_fitness(section, height, width) :
             this._section_fitness(section, width, height);
     }
@@ -226,8 +238,8 @@ class GuillotineBaf extends Guillotine {
 const BafMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
-      
+    }
+
     _section_fitness(section, width, height) {
         if (width > section.width || height > section.height) {
             return null;
@@ -248,7 +260,7 @@ class GuillotineBlsf extends Guillotine {
 const BlsfMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
+    }
 
     _section_fitness(section, width, height) {
         if (width > section.width || height > section.height) {
@@ -271,7 +283,7 @@ class GuillotineBssf extends Guillotine {
 const BssfMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
+    }
     _section_fitness(section, width, height) {
         if (width > section.width || height > section.height) {
             return null;
@@ -286,7 +298,7 @@ const BssfMixin = Base => class extends Base {
 const SasMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
+    }
     _split(section, width, height) {
         if (section.width < section.height) {
             return this._split_horizontal(section, width, height);
@@ -309,8 +321,8 @@ class GuillotineSas extends GuillotineSasBase {
 const LasMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
-      _split(section, width, height) {
+    }
+    _split(section, width, height) {
         if (section.width >= section.height) {
             return this._split_horizontal(section, width, height);
         } else {
@@ -332,8 +344,8 @@ class GuillotineLas extends GuillotineLasBase {
 const SlasMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
-      _split(section, width, height) {
+    }
+    _split(section, width, height) {
         if (section.width - width < section.height - height) {
             return this._split_horizontal(section, width, height);
         } else {
@@ -354,8 +366,8 @@ class GuillotineSlas extends GuillotineSlasBase {
 const LlasMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
-      _split(section, width, height) {
+    }
+    _split(section, width, height) {
         if (section.width - width < section.height - height) {
             return this._split_horizontal(section, width, height);
         } else {
@@ -377,8 +389,8 @@ class GuillotineLlas extends GuillotineLlasBase {
 const MaxasMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
-      _split(section, width, height) {
+    }
+    _split(section, width, height) {
         if (section.width - width < section.height - height) {
             return this._split_horizontal(section, width, height);
         } else {
@@ -400,8 +412,8 @@ class GuillotineMaxas extends GuillotineMaxasBase {
 const MinasMixin = Base => class extends Base {
     constructor(...args) {
         super(...args);
-      }
-      _split(section, width, height) {
+    }
+    _split(section, width, height) {
         if (width * (section.height - height) >= height * (section.width - width)) {
             return this._split_horizontal(section, width, height);
         } else {
@@ -424,11 +436,11 @@ const GuillotineBssfSasBase = SasMixin(BssfMixin(Guillotine));
 class GuillotineBssfSas extends GuillotineBssfSasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
-  
+
+    }
+
     // Optionally override or combine behaviors here
-  }
+}
 
 
 
@@ -437,8 +449,8 @@ const GuillotineBssfLasBase = LasMixin(BssfMixin(Guillotine));
 class GuillotineBssfLas extends GuillotineBssfLasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBssfSlasBase = SlasMixin(BssfMixin(Guillotine));
@@ -446,8 +458,8 @@ const GuillotineBssfSlasBase = SlasMixin(BssfMixin(Guillotine));
 class GuillotineBssfSlas extends GuillotineBssfSlasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBssfLlasBase = LlasMixin(BssfMixin(Guillotine));
@@ -455,8 +467,8 @@ const GuillotineBssfLlasBase = LlasMixin(BssfMixin(Guillotine));
 class GuillotineBssfLlas extends GuillotineBssfLlasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBssfMaxasBase = MaxasMixin(BssfMixin(Guillotine));
@@ -464,8 +476,8 @@ const GuillotineBssfMaxasBase = MaxasMixin(BssfMixin(Guillotine));
 class GuillotineBssfMaxas extends GuillotineBssfMaxasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBssfMinasBase = MinasMixin(BssfMixin(Guillotine));
@@ -473,8 +485,8 @@ const GuillotineBssfMinasBase = MinasMixin(BssfMixin(Guillotine));
 class GuillotineBssfMinas extends GuillotineBssfMinasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBlsfSasBase = SasMixin(BlsfMixin(Guillotine));
@@ -482,8 +494,8 @@ const GuillotineBlsfSasBase = SasMixin(BlsfMixin(Guillotine));
 class GuillotineBlsfSas extends GuillotineBlsfSasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBlsfLasBase = LasMixin(BlsfMixin(Guillotine));
@@ -491,8 +503,8 @@ const GuillotineBlsfLasBase = LasMixin(BlsfMixin(Guillotine));
 class GuillotineBlsfLas extends GuillotineBlsfLasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBlsfSlasBase = SlasMixin(BlsfMixin(Guillotine));
@@ -500,8 +512,8 @@ const GuillotineBlsfSlasBase = SlasMixin(BlsfMixin(Guillotine));
 class GuillotineBlsfSlas extends GuillotineBlsfSlasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 
@@ -510,8 +522,8 @@ const GuillotineBlsfLlasBase = LlasMixin(BlsfMixin(Guillotine));
 class GuillotineBlsfLlas extends GuillotineBlsfLlasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBlsfMaxasBase = MaxasMixin(BlsfMixin(Guillotine));
@@ -519,8 +531,8 @@ const GuillotineBlsfMaxasBase = MaxasMixin(BlsfMixin(Guillotine));
 class GuillotineBlsfMaxas extends GuillotineBlsfMaxasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBlsfMinasBase = MinasMixin(BlsfMixin(Guillotine));
@@ -528,8 +540,8 @@ const GuillotineBlsfMinasBase = MinasMixin(BlsfMixin(Guillotine));
 class GuillotineBlsfMinas extends GuillotineBlsfMinasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBafSasBase = SasMixin(BafMixin(Guillotine));
@@ -537,8 +549,8 @@ const GuillotineBafSasBase = SasMixin(BafMixin(Guillotine));
 class GuillotineBafSas extends GuillotineBafSasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBafLasBase = LasMixin(BafMixin(Guillotine));
@@ -546,8 +558,8 @@ const GuillotineBafLasBase = LasMixin(BafMixin(Guillotine));
 class GuillotineBafLas extends GuillotineBafLasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBafSlasBase = SlasMixin(BafMixin(Guillotine));
@@ -555,8 +567,8 @@ const GuillotineBafSlasBase = SlasMixin(BafMixin(Guillotine));
 class GuillotineBafSlas extends GuillotineBafSlasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 
@@ -565,8 +577,8 @@ const GuillotineBafLlasBase = LlasMixin(BafMixin(Guillotine));
 class GuillotineBafLlas extends GuillotineBafLlasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBafMaxasBase = MaxasMixin(BafMixin(Guillotine));
@@ -574,8 +586,8 @@ const GuillotineBafMaxasBase = MaxasMixin(BafMixin(Guillotine));
 class GuillotineBafMaxas extends GuillotineBafMaxasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 const GuillotineBafMinasBase = MinasMixin(BafMixin(Guillotine));
@@ -583,8 +595,8 @@ const GuillotineBafMinasBase = MinasMixin(BafMixin(Guillotine));
 class GuillotineBafMinas extends GuillotineBafMinasBase {
     constructor(...args) {
         super(...args); // 🔑 this forwards the argument!
-        
-      }
+
+    }
 }
 
 module.exports = {
