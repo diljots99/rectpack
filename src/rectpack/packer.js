@@ -180,11 +180,11 @@ const PackerMixin = Base => class extends Base {
         this._availBins.push([width, height, count, options]);
     }
 
-    addRect(width, height, rid = null) {
-        this._availRect.push([width, height, rid]);
+    addRect(width, height, rid = null, file = null) {
+        this._availRect.push([width, height, rid, file]);
     }
-    addRectOffline(width, height, rid = null) {
-        this._availRect.push([width, height, rid]);
+    addRectOffline(width, height, rid = null, file = null) {
+        this._availRect.push([width, height, rid, file]);
     }
 
     _isEverythingReady() {
@@ -227,14 +227,14 @@ const PackerBNFMixin = Base => class extends Base {
       super(...args);
     }
   
-      addRect(width, height, rid = null) {
+      addRect(width, height, rid = null, file = null) {
         while (true) {
             if (this._openBins.length === 0) {
-                const newBin =   this._newOpenBin(width, height, rid);
+                const newBin =   this._newOpenBin(width, height, rid, file);
                 if (!newBin) return null;
             }
 
-            const rect =   this._openBins[0].addRect(width, height, rid);
+            const rect =   this._openBins[0].addRect(width, height, rid, file);
             if (rect) return rect;
 
             const closedBin = this._openBins.shift();
@@ -248,17 +248,17 @@ const PackerBFFMixin = Base => class extends Base {
       super(...args);
     }
 
-      addRect(width, height, rid = null) {
+      addRect(width, height, rid = null, file = null) {
         for (const bin of this._openBins) {
-            const rect =   bin.addRect(width, height, rid);
+            const rect =   bin.addRect(width, height, rid, file);
             if (rect) return rect;
         }
 
         while (true) {
-            const newBin =   this._newOpenBin(width, height, rid);
+            const newBin =   this._newOpenBin(width, height, rid, file);
             if (!newBin) return null;
 
-            const rect =   newBin.addRect(width, height, rid);
+            const rect =   newBin.addRect(width, height, rid, file);
             if (rect) return rect;
         }
     }
@@ -270,7 +270,7 @@ const PackerBBFMixin = Base => class extends Base {
     super(...args);
   }
 
-    addRect(width, height, rid = null) {
+    addRect(width, height, rid = null, file = null) {
     // Try packing into open bins
     const fitBins = this._openBins
         .map(b => [b.fitness(width, height), b])
@@ -280,16 +280,16 @@ const PackerBBFMixin = Base => class extends Base {
         const [_, bestBin] = fitBins.reduce((min, curr) => 
             curr[0] < min[0] ? curr : min
         );
-        bestBin.addRect(width, height, rid);
+        bestBin.addRect(width, height, rid, file);
         return true;
     }
 
     // Try packing into empty bins
     while (true) {
-        const newBin =   this._newOpenBin(width, height, rid);
+        const newBin =   this._newOpenBin(width, height, rid, file);
         if (!newBin) return false;
 
-        if (  newBin.addRect(width, height, rid)) {
+        if (  newBin.addRect(width, height, rid, file)) {
             return true;
         }
     }

@@ -53,8 +53,8 @@ const ALLOW_ROTATION = true;
 const packer = newPacker({
     mode: PackingMode.Offline,     // Can be Online or Offline
     binAlgo: PackingBin.BBF,      // Bin Best Fit algorithm
-    // packAlgo: GuillotineBssfSas,  // Guillotine algorithm for rectangle placement
-    packAlgo: MaxRectsBlsf,  // Guillotine algorithm for rectangle placement
+    packAlgo: GuillotineBssfSas,  // Guillotine algorithm for rectangle placement
+    // packAlgo: MaxRectsBlsf,    // Guillotine algorithm for rectangle placement
     sortAlgo: SORT_AREA,          // Sort rectangles by area
     rotation: true                 // Allow rectangles to be rotated
 });
@@ -74,7 +74,12 @@ async function main() {
                 Math.min((design.width + SPACING) , (design.height + SPACING)),
                 Math.max((design.width + SPACING) , (design.height + SPACING))
             ];
-            packer.addRect(normalised[0], normalised[1], rid);
+            const obj = {
+                isShowFileName: true,
+                fileNameSpace: 100
+            }
+            const fileJson = JSON.stringify(obj)
+            packer.addRect(normalised[0], normalised[1], rid, fileJson);
             imageInstances.push(design);
         }
     }
