@@ -15,7 +15,7 @@
     "url": "https://github.com/diljots99/rectpack.git"
   },
   "author": "Diljot Singh",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "canvas": "^3.1.0",
     "guillotine-packer": "^1.0.2",

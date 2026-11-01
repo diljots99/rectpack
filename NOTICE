@@ -1,0 +1,10 @@
+rectpackbin
+Copyright 2025 Diljot Singh
+
+This project is a JavaScript port of rectpack, a Python library
+written by SecNot and released under the Apache License 2.0:
+https://github.com/secnot/rectpack
+
+The packing algorithms, the overall structure and most of the tests
+come from that project. The JavaScript translation and the npm
+packaging are the changes made here.
