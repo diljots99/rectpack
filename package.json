@@ -1,7 +1,19 @@
 {
   "name": "rectpackbin",
-  "version": "0.0.8",
-  "description": "A helpful description of your package",
+  "version": "0.0.10",
+  "description": "Rectangle bin packing for JavaScript (MaxRects, Skyline and Guillotine), ported from the Python rectpack library.",
+  "keywords": [
+    "bin-packing",
+    "rectangle-packing",
+    "rectpack",
+    "maxrects",
+    "skyline",
+    "guillotine"
+  ],
+  "homepage": "https://www.diljotsingh.com",
+  "bugs": {
+    "url": "https://github.com/diljots99/rectpack/issues"
+  },
   "main": "src/index.js",
   "module": "commonjs",
   "scripts": {
@@ -14,7 +26,10 @@
     "type": "git",
     "url": "https://github.com/diljots99/rectpack.git"
   },
-  "author": "Diljot Singh",
+  "author": {
+    "name": "Diljot Singh",
+    "url": "https://www.diljotsingh.com"
+  },
   "license": "MIT",
   "dependencies": {
     "canvas": "^3.1.0",
